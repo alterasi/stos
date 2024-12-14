@@ -17,6 +17,15 @@ type User struct {
 	Gender   string
 	WifeName string
 	Role     UserRole
-	Children []*User
+	Children []Children
+	Birthday time.Time
+}
+
+type Children struct {
+	Name     string
+	Age      int
+	Gender   string
+	WifeName string
+	Role     UserRole
 	Birthday time.Time
 }

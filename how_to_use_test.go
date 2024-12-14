@@ -7,8 +7,14 @@ import (
 )
 
 func TestGenerateMapperStos(t *testing.T) {
-	err := NewMapperGenerator((*mapper.MapperUser)(nil))
+	mapa, err := NewMapperGenerator((*mapper.MapperUser)(nil))
 	if err != nil {
 		log.Fatalf("Error generating code: %v", err)
 	}
+
+	if err = mapa.WriteToFile(); err != nil {
+		log.Fatalf("Error generating code: %v", err)
+	}
+
+	return
 }
