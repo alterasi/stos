@@ -1,4 +1,4 @@
-package main
+package stos
 
 import (
 	"fmt"
@@ -19,8 +19,7 @@ type MapperGenerator struct {
 	HelperMethods []string
 }
 
-// NewMapperGenerator creates a new instance of MapperGenerator
-func NewMapperGenerator(interfaceType interface{}) error {
+func MapStructToStruct(interfaceType interface{}) error {
 	typ := reflect.TypeOf(interfaceType)
 	if typ.Kind() == reflect.Ptr {
 		typ = typ.Elem()
