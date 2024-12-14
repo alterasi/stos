@@ -358,8 +358,9 @@ func (g *MapperGenerator) writeToFile() error {
 	if err != nil {
 		return err
 	}
+	titleInterface := strings.ToLower(g.InterfaceType.Name()[:1]) + g.InterfaceType.Name()[1:]
 
-	fileName := fmt.Sprintf("%s_mapper.go", strings.ToLower(g.InterfaceType.Name()))
+	fileName := fmt.Sprintf("%sImpl.go", titleInterface)
 	filePath := filepath.Join(g.PackageDir, fileName)
 
 	if err := os.WriteFile(filePath, []byte(code), 0644); err != nil {
