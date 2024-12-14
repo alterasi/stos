@@ -20,32 +20,34 @@ type MapperGenerator struct {
 }
 
 // NewMapperGenerator creates a new instance of MapperGenerator
-func NewMapperGenerator(interfaceType interface{}) (*MapperGenerator, error) {
+func NewMapperGenerator(interfaceType interface{}) error {
 	typ := reflect.TypeOf(interfaceType)
 	if typ.Kind() == reflect.Ptr {
 		typ = typ.Elem()
 	}
 	if typ.Kind() != reflect.Interface {
-		return nil, fmt.Errorf("expected an interface, got %s", typ.Kind())
+		return fmt.Errorf("expected an interface, got %s", typ.Kind())
 	}
 
 	pkgPath := typ.PkgPath()
 	if pkgPath == "" {
-		return nil, fmt.Errorf("unable to determine package path for interface %v", typ)
+		return fmt.Errorf("unable to determine package path for interface %v", typ)
 	}
 
 	pkgDir := getPackageDir(pkgPath)
 	if pkgDir == "" {
-		return nil, fmt.Errorf("unable to locate package directory for %s", pkgPath)
+		return fmt.Errorf("unable to locate package directory for %s", pkgPath)
 	}
 
-	return &MapperGenerator{
+	gen := &MapperGenerator{
 		InterfaceType: typ,
 		PackagePath:   pkgPath,
 		PackageDir:    pkgDir,
 		Generated:     make(map[string]bool),
 		HelperMethods: []string{},
-	}, nil
+	}
+
+	return gen.writeToFile()
 }
 
 func getPackageDir(pkgPath string) string {
@@ -278,7 +280,7 @@ func (g *MapperGenerator) addHelperMethod(sourceType, targetType reflect.Type) {
 	g.HelperMethods = append(g.HelperMethods, helperMethod)
 }
 
-func (g *MapperGenerator) GenerateCode() (string, error) {
+func (g *MapperGenerator) generateCode() (string, error) {
 	var sb strings.Builder
 
 	interfaceName := g.InterfaceType.Name()
@@ -352,8 +354,8 @@ func (g *MapperGenerator) getPackageName() string {
 	return parts[len(parts)-1]
 }
 
-func (g *MapperGenerator) WriteToFile() error {
-	code, err := g.GenerateCode()
+func (g *MapperGenerator) writeToFile() error {
+	code, err := g.generateCode()
 	if err != nil {
 		return err
 	}
