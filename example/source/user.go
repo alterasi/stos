@@ -16,7 +16,7 @@ type User struct {
 	Age      int
 	Gender   string
 	WifeName string
-	Role     UserRole
+	Role     *UserRole
 	Children []Children
 	Birthday time.Time
 }
