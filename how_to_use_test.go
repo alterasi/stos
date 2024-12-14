@@ -1,4 +1,4 @@
-package main
+package stos
 
 import (
 	"github.com/alterasi/stos/example/mapper"
