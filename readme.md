@@ -1,4 +1,4 @@
-# Stos - Struct Mapper Generator
+# StoS - Struct to Struct Mapper Generator
 
 Stos is a Go-based tool that automatically generates mappers to convert one struct to another. The main idea is to define an interface, and the tool will automatically implement the mapping logic.
 
