@@ -227,23 +227,38 @@ func (g *MapperGenerator) generateFieldMapping(sourceField, targetField reflect.
 				g.addHelperMethod(sourceElemType, targetElemType)
 			}
 
-			return fmt.Sprintf(`	// Slice mapping with element type conversion
-	if len(objSource.%s) > 0 {
-		objTarget.%s = make([]%s, len(objSource.%s))
-		for i, v := range objSource.%s {
-			objTarget.%s[i] = impl.%s(v)
-		}
-	}
-`, sourceField.Name, targetField.Name, targetElemType.String(), sourceField.Name, sourceField.Name, targetField.Name, methodName)
+			return fmt.Sprintf("\t// Slice mapping with element type conversion\nif len(objSource.%s) > 0 {\n\tobjTarget.%s = make([]%s, len(objSource.%s))\n\tfor i, v := range objSource.%s {\n\t\tobjTarget.%s[i] = impl.%s(v)\n\t}\n}\n", sourceField.Name, targetField.Name, targetElemType.String(), sourceField.Name, sourceField.Name, targetField.Name, methodName)
 		}
 
-		// Simple slice copy
-		return fmt.Sprintf(`	// Simple slice copy
-	if len(objSource.%s) > 0 {
-		objTarget.%s = make([]%s, len(objSource.%s))
-		copy(objTarget.%s, objSource.%s)
-	}
-`, sourceField.Name, targetField.Name, targetElemType.String(), sourceField.Name, targetField.Name, sourceField.Name)
+		if sourceElemType.Kind() == reflect.Ptr && targetElemType.Kind() == reflect.Struct {
+			methodName := fmt.Sprintf("map%sTo%s", sourceElemType.Elem().Name(), targetElemType.Name())
+			if !g.Generated[methodName] {
+				g.Generated[methodName] = true
+				g.addHelperMethod(sourceElemType.Elem(), targetElemType)
+			}
+
+			return fmt.Sprintf("\t// Slice of pointers to slice of structs mapping\nif len(objSource.%s) > 0 {\n\tobjTarget.%s = make([]%s, len(objSource.%s))\n\tfor i, v := range objSource.%s {\n\t\tif v != nil {\n\t\t\tobjTarget.%s[i] = impl.%s(*v)\n\t\t}\n\t}\n}\n", sourceField.Name, targetField.Name, targetElemType.String(), sourceField.Name, sourceField.Name, targetField.Name, methodName)
+		}
+
+		if sourceElemType.Kind() == reflect.Struct && targetElemType.Kind() == reflect.Ptr {
+			methodName := fmt.Sprintf("map%sTo%s", sourceElemType.Name(), targetElemType.Elem().Name())
+			if !g.Generated[methodName] {
+				g.Generated[methodName] = true
+				g.addHelperMethod(sourceElemType, targetElemType.Elem())
+			}
+
+			return fmt.Sprintf("\t// Slice of structs to slice of pointers mapping\nif len(objSource.%s) > 0 {\n\tobjTarget.%s = make([]*%s, len(objSource.%s))\n\tfor i, v := range objSource.%s {\n\t\ttempVal := impl.%s(v)\n\t\tobjTarget.%s[i] = &tempVal\n\t}\n}\n", sourceField.Name, targetField.Name, targetElemType.Elem().String(), sourceField.Name, sourceField.Name, methodName, targetField.Name)
+		}
+
+		if sourceElemType.Kind() == reflect.Ptr && targetElemType.Kind() == reflect.Ptr {
+			methodName := fmt.Sprintf("map%sTo%s", sourceElemType.Elem().Name(), targetElemType.Elem().Name())
+			if !g.Generated[methodName] {
+				g.Generated[methodName] = true
+				g.addHelperMethod(sourceElemType.Elem(), targetElemType.Elem())
+			}
+
+			return fmt.Sprintf("\t// Slice of pointers to slice of pointers mapping\nif len(objSource.%s) > 0 {\n\tobjTarget.%s = make([]*%s, len(objSource.%s))\n\tfor i, v := range objSource.%s {\n\t\tif v != nil {\n\t\t\ttempVal := impl.%s(*v)\n\t\t\tobjTarget.%s[i] = &tempVal\n\t\t}\n\t}\n}\n", sourceField.Name, targetField.Name, targetElemType.Elem().String(), sourceField.Name, sourceField.Name, methodName, targetField.Name)
+		}
 	}
 
 	// Default case: add a comment for unhandled mappings

@@ -12,13 +12,14 @@ const (
 )
 
 type User struct {
-	Name     string
-	Age      int
-	Gender   string
-	WifeName string
-	Role     *UserRole
-	Children []Children
-	Birthday time.Time
+	Name      string
+	Age       int
+	Gender    string
+	WifeName  string
+	Role      *UserRole
+	Childrens []*Children
+	CH        *Children
+	Birthday  time.Time
 }
 
 type Children struct {

@@ -6,12 +6,13 @@ import (
 )
 
 type UserDTO struct {
-	Name     string
-	Age      int
-	Role     source.UserRole
-	Children []*ChildrenDTO
-	Gender   string
-	Birthday time.Time
+	Name      string
+	Age       int
+	Role      source.UserRole
+	Childrens []ChildrenDTO
+	CH        ChildrenDTO
+	Gender    string
+	Birthday  time.Time
 }
 
 type ChildrenDTO struct {
