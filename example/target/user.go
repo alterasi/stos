@@ -9,7 +9,7 @@ type UserDTO struct {
 	Name     string
 	Age      int
 	Role     source.UserRole
-	Children []ChildrenDTO
+	Children []*ChildrenDTO
 	Gender   string
 	Birthday time.Time
 }
